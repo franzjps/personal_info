@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <title>Personal Info</title>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="full_name">FULL NAME:</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" type="text">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="email_add">EMAIL ADDRESS:</label>
+                <input type="email" class="form-control" id="email_add" name="email_add" type="text">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="mobile_number">MOBILE NUMBER:</label>
+                <input type="text" class="form-control" id="mobile_number" name="mobile_number" type="text">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="birth_date">DATE OF BIRTH:</label>
+                <input type="text" class="form-control" id="birth_date" name="birth_date" type="text">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="age">AGE:</label>
+                <input type="text" class="form-control" id="age" name="age" type="text" readonly>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto">
+                <label for="gender">GENDER:</label>
+                <select class="form-select" name="gender" id="gender">
+                    <option value="" selected>--SELECT--</option>
+                    <option value="male">MALE</option>
+                    <option value="female">FEMALE</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 ms-auto me-auto mt-5">
+                <button class="btn btn-success" onclick="submitForm()">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script>
+$(document).ready(function() {
+    $('#full_name').on('input', function() {
+        let full_name = $(this).val();
+        let name_regex = /\d/g;
+
+        if (name_regex.test(full_name)) {
+            alert("can't have numbers");
+        } 
+
+        full_name = full_name.replace(/\d/g, '');
+        $(this).val(full_name);
+    });
+  
+    $('#email_add').blur('input', function () {
+        let email_add = $(this).val();
+        let email_reqex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+        if (!email_reqex.test(email_add)) {
+            alert("wrong email format");
+        } 
+    });
+  
+    $('#mobile_number').blur('input', function () {
+        let mobile_number = $(this).val();
+        let number_regex = /^09\d{9}$/;
+
+        if (!number_regex.test(mobile_number)) {
+            alert("wrong PH mobile number format");
+            $('#mobile_number').val('');
+        } 
+    });
+    
+    $("#birth_date").datepicker({
+        dateFormat: "yy-mm-dd",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "1900:2050",
+        onSelect: function (pick_date) {
+            $(this).val(pick_date);
+            let date_selected = $("#birth_date").datepicker("getDate");
+
+            if (date_selected !== null) {
+                let  birth_date = new Date(date_selected);
+                let today = new Date();
+
+                let age = today.getFullYear() - birth_date.getFullYear();
+                $('#age').val(age);
+            }
+        }
+    });
+
+    $("#birth_date").on("focus", function () {
+        $(this).blur();
+    });
+  
+});
+    function submitForm(){
+        
+        let full_name = $('#full_name').val();
+        let email_add = $('#email_add').val();
+        let mobile_number = $('#mobile_number').val();
+        let birth_date = $('#birth_date').val();
+        let age = $('#age').val();
+        let gender = $('#gender').val();
+        
+        if(full_name == ''){
+            alert("FULL NAME must be filled up");
+            return;
+        }
+        
+        if(email_add == '')
+        {
+            alert("EMAIL ADDRESS must be filled up");
+            return;
+        }
+        
+        if(mobile_number == ''){
+            alert("MOBILE NUMBER must be filled up");
+            return;
+        }
+        
+        if(birth_date == ''){
+            alert("DATE OF BIRTH must be filled up");
+            return;
+        }
+        
+        if(age == ''){
+            alert("AGE must be filled up");
+            return;
+        }
+        
+        if(gender == ''){
+            alert("GENDER must be filled up");
+            return;
+        }
+
+        const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: "info.php",
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken
+            },
+            data: { 
+                full_name: full_name,
+                email_add: email_add,
+                mobile_number: mobile_number,
+                birth_date: birth_date,
+                age: age,
+                gender: gender
+                },
+            success: function(response) {
+                if(response == 'SAVED'){
+                    alert('SUCCESSFULLY SAVED');
+                    location.reload();
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log('Error sending data:', errorThrown);
+            }
+        });
+    }
+</script>
+</html>
